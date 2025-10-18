@@ -22,6 +22,8 @@ export const typeDefs = `
     title: String!
     createdAt: String!
     updatedAt: String!
+    text: String!
+    user: User!
   }
 
   input ModifyUserInput {

@@ -4,7 +4,11 @@ import { Post } from "../../entities/Post.js";
 export const postResolvers = {
   Query: {
     posts: async (_: any, __: any, { em }: MikroORM): Promise<Post[]> => {
-      const posts = await em.find(Post, {}, { orderBy: { createdAt: "DESC" } });
+      const posts = await em.find(
+        Post,
+        {},
+        { orderBy: { createdAt: "DESC" }, populate: ["user"] }
+      );
       return posts;
     },
     post: async (_: any, { id }: any, { em }: MikroORM): Promise<Post> => {
