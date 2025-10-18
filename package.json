@@ -1,0 +1,50 @@
+{
+  "name": "reddit-clone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --watch src -e ts --exec ts-node-esm src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start2": "nodemon dist/index.js",
+    "watch": "tsc -w",
+    "mikro-orm": "ts-node --esm ./node_modules/.bin/mikro-orm",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@mikro-orm/cli": "^6.5.3",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@apollo/server": "^5.0.0",
+    "@mikro-orm/core": "^6.5.3",
+    "@mikro-orm/migrations": "^6.5.3",
+    "@mikro-orm/mysql": "^6.5.3",
+    "@types/cors": "^2.8.19",
+    "apollo-server-express": "^3.13.0",
+    "argon2": "^0.44.0",
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "connect-redis": "^9.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "graphql": "^16.11.0",
+    "install": "^0.13.0",
+    "npm": "^11.6.1",
+    "p": "^0.2.0",
+    "redis": "^5.8.2",
+    "reflect-metadata": "^0.2.2",
+    "type-graphql": "^2.0.0-rc.2"
+  }
+}
