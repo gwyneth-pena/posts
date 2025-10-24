@@ -41,6 +41,8 @@
     "express-session": "^1.18.2",
     "graphql": "^16.11.0",
     "install": "^0.13.0",
+    "mongoose": "^8.19.2",
+    "nodemailer": "^7.0.9",
     "npm": "^11.6.1",
     "p": "^0.2.0",
     "redis": "^5.8.2",

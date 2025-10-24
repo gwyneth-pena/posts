@@ -2,7 +2,7 @@ import { ApolloServer } from "apollo-server-express";
 import express from "express";
 import { typeDefs } from "./graphql/schema.js";
 import { resolvers } from "./graphql/resolvers/resolvers.js";
-import { initORM } from "./db.js";
+import { connectToMongo, initORM } from "./db.js";
 import { TrimStringsPlugin } from "./graphql/plugins/trimStrings.js";
 import session from "express-session";
 import { RedisStore } from "connect-redis";
@@ -10,6 +10,8 @@ import redisClient from "./redis.js";
 import cors from "cors";
 
 export async function createServer() {
+  await connectToMongo();
+  
   const orm = await initORM();
 
   const app = express();

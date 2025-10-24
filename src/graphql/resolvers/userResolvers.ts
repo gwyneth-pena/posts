@@ -2,6 +2,9 @@ import { MikroORM } from "@mikro-orm/core";
 import { User } from "../../entities/User.js";
 import argon2 from "argon2";
 import { EntityManager } from "@mikro-orm/mysql";
+import { sendMail } from "../../email/mailer.js";
+import { PasswordToken } from "../../schema/passwordTokenSchema.js";
+import crypto from "crypto";
 
 export const userResolvers = {
   Query: {
@@ -24,7 +27,10 @@ export const userResolvers = {
     userMe: async (
       _: any,
       __: any,
-      { em, req }:{
+      {
+        em,
+        req,
+      }: {
         em: EntityManager;
         req: {
           session: {
@@ -125,6 +131,58 @@ export const userResolvers = {
 
       req.session.userId = user.id;
       return sanitizeUser(user);
+    },
+    sendResetPasswordEmail: async (
+      _: any,
+      { email }: { email: string },
+      { em }: MikroORM
+    ): Promise<Boolean> => {
+      const user = await em.findOne(User, { email });
+      if (!user) {
+        throw new Error("User not found.");
+      }
+      const selector = crypto.randomBytes(8).toString("hex");
+      const rawToken = crypto.randomBytes(32).toString("hex");
+      const resetToken = await argon2.hash(rawToken);
+
+      const doc = await PasswordToken.create({
+        selector: selector,
+        token: resetToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 30),
+      });
+      await doc.save();
+      const resetLink = `${process.env.FRONTEND_URL}/forgot-password?token=${rawToken}&selector=${selector}`;
+      await sendMail(email, resetLink);
+      return true;
+    },
+    resetPassword: async (
+      _: any,
+      {
+        selector,
+        token,
+        password,
+      }: { selector: string; token: string; password: string },
+      { em }: MikroORM
+    ): Promise<Boolean> => {
+      const tokenDoc = await PasswordToken.findOne({ selector });
+      if (!tokenDoc) {
+        throw new Error("Invalid token.");
+      }
+      const matched = await argon2.verify(tokenDoc.token, token);
+      if (!matched) {
+        throw new Error("Invalid token.");
+      }
+
+      const user = await em.findOne(User, tokenDoc.userId);
+      if (!user) {
+        throw new Error("Invalid token.");
+      }
+      const hashedPassword = await argon2.hash(password);
+      user.password = hashedPassword;
+      await em.persistAndFlush(user);
+      await tokenDoc.deleteOne();
+      return true;
     },
   },
 };

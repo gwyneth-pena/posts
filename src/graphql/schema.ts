@@ -15,6 +15,8 @@ export const typeDefs = `
     updateUser(id: ID!, data: ModifyUserInput): User!
     deleteUser(id: ID!): Boolean!
     loginUser(username: String!, password: String!): User
+    sendResetPasswordEmail(email: String!): Boolean!
+    resetPassword(selector: String!, token: String!, password: String!): Boolean!
   }
 
   type Post {
