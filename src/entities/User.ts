@@ -12,8 +12,8 @@ export class User {
   @Property({ type: "text", hidden: true })
   password: string;
 
-  @Property({ type: "text", nullable: true })
-  email?: string;
+  @Property({ type: "varchar", nullable: false,  length: 255, unique: true })
+  email: string;
 
   @Property()
   createdAt: Date = new Date();
