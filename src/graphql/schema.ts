@@ -8,8 +8,8 @@ export const typeDefs = `
   }
 
   type Mutation {
-    createPost(title: String!): Post!
-    updatePost(id: ID!, title: String!): Post!
+    createPost(title: String!, text: String!): Post!
+    updatePost(id: ID!, title: String!, text: String!): Post!
     deletePost(id: ID!): Boolean!
     createUser(data: ModifyUserInput): User!
     updateUser(id: ID!, data: ModifyUserInput): User!
