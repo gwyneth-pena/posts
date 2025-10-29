@@ -5,6 +5,7 @@ export const typeDefs = `
     users: [User!]!
     user(id: ID!): User
     userMe: User
+    commentsByPost(postId: ID!): [Comment!]!
   }
 
   type Mutation {
@@ -17,6 +18,9 @@ export const typeDefs = `
     loginUser(username: String!, password: String!): User
     sendResetPasswordEmail(email: String!): Boolean!
     resetPassword(selector: String!, token: String!, password: String!): Boolean!
+    createComment(text: String!, postId: ID!): Comment!
+    updateComment(id: ID!, text: String!): Comment!
+    deleteComment(id: ID!): Boolean!
   }
 
   type Post {
@@ -40,5 +44,23 @@ export const typeDefs = `
     email: String
     createdAt: String!
     updatedAt: String!
+  }
+
+  type Comment {
+    id: ID!
+    text: String!
+    createdAt: String!
+    updatedAt: String!
+    user: User!
+    post: Post!
+  }
+
+  type Vote {
+    id: ID!
+    value: Int!
+    createdAt: String!
+    updatedAt: String!
+    user: User!
+    post: Post!
   }
 `;
