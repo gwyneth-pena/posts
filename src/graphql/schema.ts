@@ -6,6 +6,8 @@ export const typeDefs = `
     user(id: ID!): User
     userMe: User
     commentsByPost(postId: ID!): [Comment!]!
+    votesPerLoggedInUser: [Vote!]!
+    votesPerPost(postIds: [ID!]!): [Vote!]!
   }
 
   type Mutation {
@@ -21,6 +23,9 @@ export const typeDefs = `
     createComment(text: String!, postId: ID!): Comment!
     updateComment(id: ID!, text: String!): Comment!
     deleteComment(id: ID!): Boolean!
+    createVote(value: Int!, postId: ID!): Vote!
+    updateVote(id: ID!, value: Int!): Vote!
+    deleteVote(id: ID!): Boolean!
   }
 
   type Post {
