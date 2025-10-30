@@ -1,6 +1,8 @@
 import { EntityManager, MikroORM } from "@mikro-orm/mysql";
 import { Post } from "../../entities/Post.js";
 import { User } from "../../entities/User.js";
+import { Vote } from "../../entities/Vote.js";
+import { Comment } from "../../entities/Comment.js";
 
 export const postResolvers = {
   Query: {
@@ -10,11 +12,39 @@ export const postResolvers = {
         {},
         { orderBy: { createdAt: "DESC" }, populate: ["user"] }
       );
-      return posts;
+      const postsWithCounts = await Promise.all(
+        posts.map(async (post) => {
+          const [commentCount, likeCount, dislikeCount] = await Promise.all([
+            em.count(Comment, { post }),
+            em.count(Vote, { post, value: 1 }),
+            em.count(Vote, { post, value: -1 }),
+          ]);
+
+          return {
+            ...post,
+            commentCount,
+            likeCount,
+            dislikeCount,
+          };
+        })
+      );
+      return postsWithCounts;
     },
-    post: async (_: any, { id }: any, { em }: MikroORM): Promise<Post> => {
+    post: async (_: any, { id }: any, { em }: MikroORM): Promise<any> => {
       const post = await em.findOne(Post, id, { populate: ["user"] });
-      return post;
+
+      const [commentCount, likeCount, dislikeCount] = await Promise.all([
+        em.count(Comment, { post }),
+        em.count(Vote, { post, value: 1 }),
+        em.count(Vote, { post, value: -1 }),
+      ]);
+
+      return {
+        ...post,
+        commentCount,
+        likeCount,
+        dislikeCount,
+      };
     },
   },
   Mutation: {

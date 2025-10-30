@@ -35,6 +35,9 @@ export const typeDefs = `
     updatedAt: String!
     text: String!
     user: User!
+    likeCount: Int!
+    dislikeCount: Int!
+    commentCount: Int!
   }
 
   input ModifyUserInput {

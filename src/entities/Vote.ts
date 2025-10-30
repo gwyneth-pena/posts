@@ -1,20 +1,19 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import { Post } from "./Post.js";
-import { User } from "./User.js";
+import { Entity, ManyToOne, PrimaryKey, Property, Ref } from "@mikro-orm/core";
+import { User } from "./User.js"; 
 
 @Entity()
 export class Vote {
   @PrimaryKey()
   id!: number;
 
-  @ManyToOne(() => Post)
-  post: Post;
+  @ManyToOne({ entity: () => 'Post' })
+  post!: Ref<any>;
 
-  @ManyToOne(() => User)
-  user: User;
+  @ManyToOne({ entity: () => User })
+  user!: Ref<User>;
 
   @Property()
-  value: 1 | -1;
+  value!: 1 | -1;
 
   @Property()
   createdAt: Date = new Date();
