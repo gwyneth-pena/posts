@@ -1,49 +1,166 @@
-import { EntityManager, MikroORM } from "@mikro-orm/mysql";
+import { EntityManager, MikroORM, raw } from "@mikro-orm/mysql";
 import { Post } from "../../entities/Post.js";
 import { User } from "../../entities/User.js";
 import { Vote } from "../../entities/Vote.js";
 import { Comment } from "../../entities/Comment.js";
 
+async function getPostCounts(
+  em: EntityManager,
+  postIds: number[],
+  options?: { includeUserVote?: boolean; userId?: number }
+) {
+  if (postIds.length === 0) return new Map();
+
+  const [commentCounts, likeCounts, dislikeCounts] = await Promise.all([
+    em
+      .createQueryBuilder(Comment, "c")
+      .select(["c.post_id as postId", raw("COUNT(c.id) as count")])
+      .where({ post: { id: { $in: postIds } } })
+      .groupBy("c.post_id")
+      .execute() as Promise<{ postId: number; count: string }[]>,
+
+    em
+      .createQueryBuilder(Vote, "v")
+      .select(["v.post_id as postId", raw("COUNT(v.id) as count")])
+      .where({ value: 1, post: { id: { $in: postIds } } })
+      .groupBy("v.post_id")
+      .execute() as Promise<{ postId: number; count: string }[]>,
+
+    em
+      .createQueryBuilder(Vote, "v")
+      .select(["v.post_id as postId", raw("COUNT(v.id) as count")])
+      .where({ value: -1, post: { id: { $in: postIds } } })
+      .groupBy("v.post_id")
+      .execute() as Promise<{ postId: number; count: string }[]>,
+  ]);
+
+  const countsMap = new Map<
+    number,
+    {
+      commentCount: number;
+      likeCount: number;
+      dislikeCount: number;
+      userVote?: number;
+    }
+  >();
+
+  for (const id of postIds) {
+    const commentCount =
+      commentCounts.find((c) => Number(c.postId) === id)?.count || 0;
+    const likeCount =
+      likeCounts.find((v) => Number(v.postId) === id)?.count || 0;
+    const dislikeCount =
+      dislikeCounts.find((v) => Number(v.postId) === id)?.count || 0;
+
+    countsMap.set(id, {
+      commentCount: Number(commentCount),
+      likeCount: Number(likeCount),
+      dislikeCount: Number(dislikeCount),
+    });
+  }
+
+  if (options?.includeUserVote && options.userId) {
+    const userVotes = await em.find(
+      Vote,
+      { user: options.userId, post: { id: { $in: postIds } } },
+      { populate: ["post"] }
+    );
+
+    for (const vote of userVotes) {
+      const postId =
+        typeof vote.post === "object" && "id" in vote.post
+          ? (vote.post as any).id
+          : (vote.post as any);
+
+      const entry = countsMap.get(postId);
+      if (entry) entry.userVote = vote.value;
+    }
+  }
+
+  return countsMap;
+}
+
 export const postResolvers = {
   Query: {
-    posts: async (_: any, __: any, { em }: MikroORM): Promise<Post[]> => {
+    posts: async (
+      _: any,
+      __: any,
+      {
+        em,
+        req,
+      }: {
+        em: EntityManager;
+        req: {
+          session: {
+            userId: number;
+          };
+        };
+      }
+    ): Promise<Post[]> => {
       const posts = await em.find(
         Post,
         {},
         { orderBy: { createdAt: "DESC" }, populate: ["user"] }
       );
-      const postsWithCounts = await Promise.all(
-        posts.map(async (post) => {
-          const [commentCount, likeCount, dislikeCount] = await Promise.all([
-            em.count(Comment, { post }),
-            em.count(Vote, { post, value: 1 }),
-            em.count(Vote, { post, value: -1 }),
-          ]);
 
-          return {
-            ...post,
-            commentCount,
-            likeCount,
-            dislikeCount,
-          };
-        })
-      );
+      const postIds = posts.map((p) => p.id);
+      const countsMap = await getPostCounts(em, postIds, {
+        includeUserVote: !!req.session?.userId,
+        userId: req.session?.userId,
+      });
+
+      const postsWithCounts = posts.map((p) => {
+        const counts = countsMap.get(p.id) || {
+          commentCount: 0,
+          likeCount: 0,
+          dislikeCount: 0,
+          userVote: undefined,
+        };
+        return { ...p, ...counts };
+      });
+
       return postsWithCounts;
     },
-    post: async (_: any, { id }: any, { em }: MikroORM): Promise<any> => {
+    post: async (
+      _: any,
+      { id }: any,
+      {
+        em,
+        req,
+      }: {
+        em: EntityManager;
+        req: {
+          session: {
+            userId: number;
+          };
+        };
+      }
+    ): Promise<any> => {
       const post = await em.findOne(Post, id, { populate: ["user"] });
+      if (!post) return null;
 
-      const [commentCount, likeCount, dislikeCount] = await Promise.all([
-        em.count(Comment, { post }),
-        em.count(Vote, { post, value: 1 }),
-        em.count(Vote, { post, value: -1 }),
-      ]);
+      const countsMap = await getPostCounts(em, [post.id], {
+        includeUserVote: !!req.session?.userId,
+        userId: req.session?.userId,
+      });
+
+      const { commentCount, likeCount, dislikeCount } = countsMap.get(
+        post.id
+      ) || {
+        commentCount: 0,
+        likeCount: 0,
+        dislikeCount: 0,
+        userVote: undefined,
+      };
 
       return {
         ...post,
         commentCount,
         likeCount,
         dislikeCount,
+        userVote: req.session?.userId
+          ? countsMap.get(post.id)?.userVote
+          : undefined,
       };
     },
   },
