@@ -39,6 +39,7 @@ export const typeDefs = `
     dislikeCount: Int!
     commentCount: Int!
     userVote: Int
+    isOwner: Boolean
   }
 
   input ModifyUserInput {

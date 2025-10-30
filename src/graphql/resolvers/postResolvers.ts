@@ -116,7 +116,13 @@ export const postResolvers = {
           dislikeCount: 0,
           userVote: undefined,
         };
-        return { ...p, ...counts };
+        return {
+          ...p,
+          ...counts,
+          ...(req.session?.userId
+            ? { isOwner: p.user.id === req.session.userId }
+            : {}),
+        };
       });
 
       return postsWithCounts;
@@ -155,6 +161,9 @@ export const postResolvers = {
 
       return {
         ...post,
+        ...(req.session?.userId
+          ? { isOwner: post.user.id === req.session.userId }
+          : {}),
         commentCount,
         likeCount,
         dislikeCount,
