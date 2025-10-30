@@ -38,6 +38,7 @@ export const typeDefs = `
     likeCount: Int!
     dislikeCount: Int!
     commentCount: Int!
+    userVote: Int
   }
 
   input ModifyUserInput {
