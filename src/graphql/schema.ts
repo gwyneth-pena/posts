@@ -25,7 +25,9 @@ export const typeDefs = `
     deleteComment(id: ID!): Boolean!
     createVote(value: Int!, postId: ID!): Vote!
     updateVote(id: ID!, value: Int!): Vote!
+    updateVoteByPost(value: Int!, postId: ID!): Vote!
     deleteVote(id: ID!): Boolean!
+    deleteVoteByPost(postId: ID!): Boolean!
   }
 
   type Post {

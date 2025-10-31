@@ -63,7 +63,10 @@ export const voteResolvers = {
       if (!req.session.userId) {
         throw new Error("User not logged in.");
       }
-      const votedPost = await em.findOne(Vote, { post: postId });
+      const votedPost = await em.findOne(Vote, {
+        post: postId,
+        user: req.session.userId,
+      });
       if (votedPost) {
         throw new Error("Post already voted.");
       }
@@ -113,6 +116,32 @@ export const voteResolvers = {
       await em.persistAndFlush(vote);
       return vote;
     },
+    updateVoteByPost: async (
+      _: any,
+      { value, postId }: { value: 1 | -1; postId: number },
+      {
+        em,
+        req,
+      }: {
+        em: EntityManager;
+        req: {
+          session: {
+            userId: number;
+          };
+        };
+      }
+    ): Promise<any> => {
+      if (!req.session.userId) {
+        throw new Error("User not logged in.");
+      }
+      const vote = await em.findOne(Vote, {
+        post: postId,
+        user: req.session.userId,
+      });
+      vote.value = value;
+      await em.persistAndFlush(vote);
+      return vote;
+    },
     deleteVote: async (
       _: any,
       { id }: { id: number },
@@ -138,6 +167,34 @@ export const voteResolvers = {
       const isFromUser = vote.user.id === req.session.userId;
       if (!isFromUser) {
         throw new Error("You are not allowed to delete this vote.");
+      }
+      await em.removeAndFlush(vote);
+      return true;
+    },
+    deleteVoteByPost: async (
+      _: any,
+      { postId }: { postId: number },
+      {
+        em,
+        req,
+      }: {
+        em: EntityManager;
+        req: {
+          session: {
+            userId: number;
+          };
+        };
+      }
+    ): Promise<any> => {
+      if (!req.session.userId) {
+        throw new Error("User not logged in.");
+      }
+      const vote = await em.findOne(Vote, {
+        post: postId,
+        user: req.session.userId,
+      });
+      if (!vote) {
+        throw new Error("Vote not found.");
       }
       await em.removeAndFlush(vote);
       return true;
