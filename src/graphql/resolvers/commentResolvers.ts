@@ -43,7 +43,7 @@ export const commentResolvers = {
         user: req.session.userId,
       });
       await em.persistAndFlush(comment);
-      return comment;
+      return em.findOneOrFail(Comment, comment.id, { populate: ["user"] });
     },
     updateComment: async (
       _: any,
