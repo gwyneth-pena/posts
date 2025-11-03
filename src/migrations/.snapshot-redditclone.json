@@ -240,14 +240,13 @@
         },
         "text": {
           "name": "text",
-          "type": "varchar(255)",
+          "type": "longtext",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "default": "''",
-          "mappedType": "string"
+          "length": null,
+          "mappedType": "unknown"
         },
         "created_at": {
           "name": "created_at",

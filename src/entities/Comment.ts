@@ -13,8 +13,8 @@ export class Comment {
   @ManyToOne({ entity: () => User })
   user: User;
 
-  @Property()
-  text: string = "";
+  @Property({ columnType: "longtext" })
+  text!: string;
 
   @Property()
   createdAt: Date = new Date();
