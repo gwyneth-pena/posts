@@ -220,6 +220,8 @@ export const postResolvers = {
       if (!post) {
         throw new Error("Post not found.");
       }
+      await em.nativeDelete(Vote, { post: id });
+      await em.nativeDelete(Comment, { post: id });
       await em.removeAndFlush(post);
       return true;
     },
