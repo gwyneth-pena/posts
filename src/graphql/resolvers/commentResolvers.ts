@@ -11,7 +11,7 @@ export const commentResolvers = {
     ): Promise<Comment[]> => {
       const comments = await em.find(
         Comment,
-        { post: postId },
+        { post: postId, parent: null },
         { populate: ["user", "children.user"] }
       );
       return comments;
