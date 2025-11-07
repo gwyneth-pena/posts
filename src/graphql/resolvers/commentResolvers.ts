@@ -95,7 +95,7 @@ export const commentResolvers = {
         };
       }
     ): Promise<Boolean> => {
-      const comment = await em.findOne(Comment, id, { populate: ["user"] });
+      const comment = await em.findOne(Comment, id, { populate: ["user", "children"] });
       if (!comment) {
         throw new Error("Comment not found.");
       }
