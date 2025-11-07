@@ -61,6 +61,8 @@ export const typeDefs = `
   type Comment {
     id: ID!
     text: String!
+    parent: Comment
+    children: [Comment!]!
     createdAt: String!
     updatedAt: String!
     user: User!

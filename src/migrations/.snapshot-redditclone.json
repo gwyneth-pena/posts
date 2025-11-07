@@ -238,6 +238,16 @@
           "length": null,
           "mappedType": "integer"
         },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "int",
+          "unsigned": true,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": null,
+          "mappedType": "integer"
+        },
         "text": {
           "name": "text",
           "type": "longtext",
@@ -292,6 +302,16 @@
           "unique": false
         },
         {
+          "columnNames": [
+            "parent_id"
+          ],
+          "composite": false,
+          "keyName": "comment_parent_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
           "keyName": "PRIMARY",
           "columnNames": [
             "id"
@@ -328,6 +348,20 @@
           ],
           "referencedTableName": "user",
           "createForeignKeyConstraint": true,
+          "updateRule": "cascade"
+        },
+        "comment_parent_id_foreign": {
+          "constraintName": "comment_parent_id_foreign",
+          "columnNames": [
+            "parent_id"
+          ],
+          "localTableName": "comment",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "comment",
+          "createForeignKeyConstraint": true,
+          "deleteRule": "set null",
           "updateRule": "cascade"
         }
       },

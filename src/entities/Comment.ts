@@ -1,4 +1,11 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import {
+  Collection,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryKey,
+  Property,
+} from "@mikro-orm/core";
 import { Post } from "./Post.js";
 import { User } from "./User.js";
 
@@ -12,6 +19,14 @@ export class Comment {
 
   @ManyToOne({ entity: () => User })
   user: User;
+
+  @ManyToOne({ entity: () => Comment, nullable: true })
+  parent?: Comment;
+
+  @OneToMany(() => Comment, (comment) => comment.parent, {
+    orphanRemoval: true,
+  })
+  children = new Collection<Comment>(this);
 
   @Property({ columnType: "longtext" })
   text!: string;

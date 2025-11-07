@@ -12,7 +12,7 @@ export const commentResolvers = {
       const comments = await em.find(
         Comment,
         { post: postId },
-        { populate: ["user"] }
+        { populate: ["user", "children.user"] }
       );
       return comments;
     },
