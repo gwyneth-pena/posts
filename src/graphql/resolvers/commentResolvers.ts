@@ -12,7 +12,10 @@ export const commentResolvers = {
       const comments = await em.find(
         Comment,
         { post: postId, parent: null },
-        { populate: ["user", "children.user"] }
+        {
+          populate: ["user", "children.user"],
+          orderBy: { createdAt: "DESC", children: { createdAt: "ASC" } },
+        }
       );
       return comments;
     },
@@ -95,7 +98,9 @@ export const commentResolvers = {
         };
       }
     ): Promise<Boolean> => {
-      const comment = await em.findOne(Comment, id, { populate: ["user", "children"] });
+      const comment = await em.findOne(Comment, id, {
+        populate: ["user", "children"],
+      });
       if (!comment) {
         throw new Error("Comment not found.");
       }
