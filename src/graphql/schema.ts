@@ -20,7 +20,7 @@ export const typeDefs = `
     loginUser(username: String!, password: String!): User
     sendResetPasswordEmail(email: String!): Boolean!
     resetPassword(selector: String!, token: String!, password: String!): Boolean!
-    createComment(text: String!, postId: ID!): Comment!
+    createComment(text: String!, postId: ID!, parentId: ID): Comment!
     updateComment(id: ID!, text: String!): Comment!
     deleteComment(id: ID!): Boolean!
     createVote(value: Int!, postId: ID!): Vote!

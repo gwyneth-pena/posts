@@ -20,7 +20,7 @@ export const commentResolvers = {
   Mutation: {
     createComment: async (
       _: any,
-      { text, postId }: any,
+      { text, postId, parentId }: any,
       {
         em,
         req,
@@ -37,10 +37,17 @@ export const commentResolvers = {
       if (!post) {
         throw new Error("Post not found.");
       }
+      if (parentId) {
+        const parent = await em.findOne(Comment, parentId);
+        if (!parent) {
+          throw new Error("Parent comment not found.");
+        }
+      }
       const comment = em.create(Comment, {
         text,
         post,
         user: req.session.userId,
+        parent: parentId ? parentId : null,
       });
       await em.persistAndFlush(comment);
       return em.findOneOrFail(Comment, comment.id, { populate: ["user"] });
