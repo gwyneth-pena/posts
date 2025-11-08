@@ -3,6 +3,7 @@ import { Post } from "../../entities/Post.js";
 import { User } from "../../entities/User.js";
 import { Vote } from "../../entities/Vote.js";
 import { Comment } from "../../entities/Comment.js";
+import * as slugifyPkg from "slugify";
 
 async function getPostCounts(
   em: EntityManager,
@@ -193,7 +194,17 @@ export const postResolvers = {
       if (!user) {
         throw new Error("User not found.");
       }
-      const post = em.create(Post, { title, text, user });
+
+      const slugify = slugifyPkg.default as unknown as (
+        text: string,
+        options?: { lower?: boolean; strict?: boolean }
+      ) => string;
+      let slug = slugify(title, { lower: true, strict: true });
+      const existingPostCount = await em.count(Post, { slug: slug });
+      if (existingPostCount > 0) {
+        slug = `${slug}-${existingPostCount + 1}`;
+      }
+      const post = em.create(Post, { title, text, user, slug });
       await em.persistAndFlush(post);
       return post;
     },

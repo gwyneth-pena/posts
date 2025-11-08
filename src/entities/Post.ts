@@ -21,6 +21,9 @@ export class Post {
   @Property({ columnType: "longtext" })
   text!: string;
 
+  @Property({ length: 255, nullable: false, unique: true })
+  slug!: string;
+
   @Property()
   createdAt: Date = new Date();
 
