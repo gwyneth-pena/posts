@@ -85,7 +85,11 @@ export const postResolvers = {
   Query: {
     posts: async (
       _: any,
-      __: any,
+      {
+        limit = 10,
+        offset = 0,
+        orderBy = "createdAt DESC",
+      }: { limit?: number; offset?: number; orderBy?: string },
       {
         em,
         req,
@@ -98,10 +102,16 @@ export const postResolvers = {
         };
       }
     ): Promise<Post[]> => {
+      const [orderField, orderDirection] = orderBy.split(" ");
       const posts = await em.find(
         Post,
         {},
-        { orderBy: { createdAt: "DESC" }, populate: ["user"] }
+        {
+          orderBy: { [`${orderField}`]: orderDirection },
+          populate: ["user"],
+          limit,
+          offset,
+        }
       );
 
       const postIds = posts.map((p) => p.id);
@@ -127,6 +137,13 @@ export const postResolvers = {
       });
 
       return postsWithCounts;
+    },
+    totalPosts: async (
+      _: any,
+      __: any,
+      { em }: { em: EntityManager }
+    ): Promise<number> => {
+      return em.count(Post, {});
     },
     post: async (
       _: any,
@@ -205,7 +222,11 @@ export const postResolvers = {
         options?: { lower?: boolean; strict?: boolean }
       ) => string;
       let slug = slugify(title, { lower: true, strict: true });
-      const existingPostCount = await em.count(Post, { slug: slug });
+      const existingPostCount = await em.count(Post, {
+        slug: {
+          $like: `${slug}%`,
+        },
+      });
       if (existingPostCount > 0) {
         slug = `${slug}-${existingPostCount + 1}`;
       }

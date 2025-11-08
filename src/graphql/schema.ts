@@ -1,7 +1,8 @@
 export const typeDefs = `
   type Query {
-    posts: [Post!]!
+    posts(limit: Int, offset: Int, orderBy: String): [Post!]!
     post(id: ID, slug: String): Post
+    totalPosts: Int!
     users: [User!]!
     user(id: ID!): User
     userMe: User
