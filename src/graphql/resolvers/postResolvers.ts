@@ -130,7 +130,7 @@ export const postResolvers = {
     },
     post: async (
       _: any,
-      { id }: any,
+      { id, slug }: any,
       {
         em,
         req,
@@ -143,7 +143,12 @@ export const postResolvers = {
         };
       }
     ): Promise<any> => {
-      const post = await em.findOne(Post, id, { populate: ["user"] });
+      let post: any;
+      if (id) {
+        post = await em.findOne(Post, id, { populate: ["user"] });
+      } else if (slug) {
+        post = await em.findOne(Post, { slug }, { populate: ["user"] });
+      }
       if (!post) return null;
 
       const countsMap = await getPostCounts(em, [post.id], {

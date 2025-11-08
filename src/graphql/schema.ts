@@ -1,7 +1,7 @@
 export const typeDefs = `
   type Query {
     posts: [Post!]!
-    post(id: ID!): Post
+    post(id: ID, slug: String): Post
     users: [User!]!
     user(id: ID!): User
     userMe: User
