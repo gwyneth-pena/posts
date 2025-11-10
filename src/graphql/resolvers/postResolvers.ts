@@ -86,10 +86,18 @@ export const postResolvers = {
     posts: async (
       _: any,
       {
+        username,
+        likedByUsername,
         limit = 10,
         offset = 0,
         orderBy = "createdAt DESC",
-      }: { limit?: number; offset?: number; orderBy?: string },
+      }: {
+        username?: string;
+        likedByUsername?: string;
+        limit?: number;
+        offset?: number;
+        orderBy?: string;
+      },
       {
         em,
         req,
@@ -103,16 +111,23 @@ export const postResolvers = {
       }
     ): Promise<Post[]> => {
       const [orderField, orderDirection] = orderBy.split(" ");
-      const posts = await em.find(
-        Post,
-        {},
-        {
-          orderBy: { [`${orderField}`]: orderDirection },
-          populate: ["user"],
-          limit,
-          offset,
-        }
-      );
+      const filters: any = {};
+
+      if (likedByUsername) {
+        filters.votes = {
+          user: { username: likedByUsername },
+          value: 1,
+        };
+      } else if (username) {
+        filters.user = { username };
+      }
+
+      const posts = await em.find(Post, filters, {
+        orderBy: { [orderField]: orderDirection },
+        populate: ["user", "votes"],
+        limit,
+        offset,
+      });
 
       const postIds = posts.map((p) => p.id);
       const countsMap = await getPostCounts(em, postIds, {
@@ -140,10 +155,16 @@ export const postResolvers = {
     },
     totalPosts: async (
       _: any,
-      __: any,
+      { username, userId }: any,
       { em }: { em: EntityManager }
     ): Promise<number> => {
-      return em.count(Post, {});
+      if (username) {
+        return em.count(Post, { user: { username } });
+      } else if (userId) {
+        return em.count(Post, { user: userId });
+      } else {
+        return em.count(Post, {});
+      }
     },
     post: async (
       _: any,

@@ -1,10 +1,10 @@
 export const typeDefs = `
   type Query {
-    posts(limit: Int, offset: Int, orderBy: String): [Post!]!
+    posts(username: String, likedByUsername: String, limit: Int, offset: Int, orderBy: String): [Post!]!
     post(id: ID, slug: String): Post
-    totalPosts: Int!
+    totalPosts(username: String, userId: ID): Int!
     users: [User!]!
-    user(id: ID!): User
+    user(id: ID, username: String): User
     userMe: User
     commentsByPost(postId: ID!): [Comment!]!
     votesPerLoggedInUser: [Vote!]!

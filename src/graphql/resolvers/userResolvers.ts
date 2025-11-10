@@ -18,10 +18,15 @@ export const userResolvers = {
     },
     user: async (
       _: any,
-      { id }: any,
+      { id, username }: any,
       { em }: MikroORM
     ): Promise<Omit<User, "password">> => {
-      const user = await em.findOne(User, id);
+      let user: User;
+      if (id) {
+        user = await em.findOne(User, id);
+      } else if (username) {
+        user = await em.findOne(User, { username });
+      }
       return sanitizeUser(user);
     },
     userMe: async (
