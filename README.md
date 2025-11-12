@@ -2,9 +2,7 @@
 
 A GraphQL API for managing posts, users, comments, and votes.  
 
-🔗 [Live Demo](https://posts-snowy-nu.vercel.app/graphql)
-
----
+https://posts-snowy-nu.vercel.app/graphql
 
 ## Table of Contents
 
