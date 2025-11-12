@@ -1,4 +1,4 @@
-# Posts Snowy GraphQL API
+# Posts GraphQL API
 
 A GraphQL API for managing posts, users, comments, and votes.  
 
