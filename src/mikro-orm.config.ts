@@ -4,6 +4,7 @@ import 'dotenv/config';
 import { Post } from './entities/Post.js';
 import { User } from './entities/User.js';
 import { Vote } from './entities/Vote.js';
+import { Comment } from './entities/Comment.js';
 
 const config: Options<MySqlDriver> = {
   driver: MySqlDriver,
