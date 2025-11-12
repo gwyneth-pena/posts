@@ -101,3 +101,10 @@ type Vote {
   user: User!
   post: Post!
 }
+
+
+input ModifyUserInput {
+  username: String!
+  password: String!
+  email: String
+}
