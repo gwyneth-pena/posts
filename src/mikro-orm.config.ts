@@ -1,6 +1,9 @@
 import { Options } from '@mikro-orm/core';
 import { MySqlDriver } from '@mikro-orm/mysql';
 import 'dotenv/config';
+import { Post } from './entities/Post.js';
+import { User } from './entities/User.js';
+import { Vote } from './entities/Vote.js';
 
 const config: Options<MySqlDriver> = {
   driver: MySqlDriver,
@@ -9,8 +12,7 @@ const config: Options<MySqlDriver> = {
   password: process.env.DB_PASS || '',
   host: process.env.DB_HOST || 'localhost',
   port: Number(process.env.DB_PORT) || 3306,
-  entities: ['/dist/entities/*.js'],
-  entitiesTs: ['/src/entities/*.ts'], 
+  entities: [Post, User, Comment, Vote],
   debug: process.env.NODE_ENV === 'development',
   migrations: {
     path: './src/migrations',        // folder for migrations
