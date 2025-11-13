@@ -49,6 +49,11 @@ export async function createServer() {
           Number(process.env.SESSION_EXPIRY_TIME || 0) || 1000 * 60 * 60 * 2,
         secure: process.env.NODE_ENV?.toLowerCase()?.includes("prod"),
         sameSite: "none",
+        ...(process.env.NODE_ENV?.toLowerCase()?.includes("prod")
+          ? {
+              domain: process.env.DOMAIN,
+            }
+          : {}),
       },
     })
   );
