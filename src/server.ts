@@ -44,7 +44,7 @@ export async function createServer() {
         maxAge:
           Number(process.env.SESSION_EXPIRY_TIME || 0) || 1000 * 60 * 60 * 2,
         secure: process.env.NODE_ENV?.toLowerCase()?.includes("prod"),
-        sameSite: "lax",
+        sameSite: "none",
       },
     })
   );
