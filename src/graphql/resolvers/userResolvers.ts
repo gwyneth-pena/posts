@@ -5,6 +5,7 @@ import { EntityManager } from "@mikro-orm/mysql";
 import { sendMail } from "../../email/mailer.js";
 import { PasswordToken } from "../../schema/passwordTokenSchema.js";
 import crypto from "crypto";
+import session from "express-session";
 
 export const userResolvers = {
   Query: {
@@ -61,11 +62,7 @@ export const userResolvers = {
         req,
       }: {
         em: EntityManager;
-        req: {
-          session: {
-            userId: number;
-          };
-        };
+        req: Request & { session: session.Session & { userId?: number } };
       }
     ): Promise<Omit<User, "password">> => {
       const hashedPassword = await argon2.hash(data.password);
@@ -76,6 +73,14 @@ export const userResolvers = {
       });
       await em.persistAndFlush(user);
       req.session.userId = user.id;
+
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+
       return sanitizeUser(user);
     },
     updateUser: async (
@@ -120,11 +125,7 @@ export const userResolvers = {
         req,
       }: {
         em: EntityManager;
-        req: {
-          session: {
-            userId: number;
-          };
-        };
+        req: Request & { session: session.Session & { userId?: number } };
       }
     ): Promise<Omit<User, "password">> => {
       const user = await em.findOne(User, { username });
@@ -137,6 +138,15 @@ export const userResolvers = {
       }
 
       req.session.userId = user.id;
+
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+
+      console.log(req.session, "USER SESSION LOGGED IN");
       return sanitizeUser(user);
     },
     sendResetPasswordEmail: async (
