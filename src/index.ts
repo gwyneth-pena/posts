@@ -2,9 +2,9 @@ import "reflect-metadata";
 import "dotenv/config";
 import { createServer } from "./server.js";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import type { Application } from "express";
+import type { Application, Request, Response } from "express";
 
-const isLocal = process.env.NODE_ENV=== "development";
+const isLocal = process.env.NODE_ENV === "development";
 
 let app: Application;
 
@@ -27,5 +27,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     app = await createServer();
   }
 
-  app(req, res);
+  const expressReq = req as unknown as Request;
+  const expressRes = res as unknown as Response;
+
+  await new Promise<void>((resolve, reject) => {
+    app(expressReq, expressRes, (err) => {
+      if (err) return reject(err);
+      resolve();
+    });
+  });
 }
