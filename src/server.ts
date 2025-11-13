@@ -34,6 +34,8 @@ export async function createServer() {
     })
   );
 
+  app.set("trust proxy", 1);
+
   app.use(
     session({
       name: "session_id",
@@ -45,7 +47,7 @@ export async function createServer() {
         httpOnly: true,
         maxAge:
           Number(process.env.SESSION_EXPIRY_TIME || 0) || 1000 * 60 * 60 * 2,
-        secure: true,
+        secure: process.env.NODE_ENV?.toLowerCase()?.includes("prod"),
         sameSite: "none",
       },
     })
