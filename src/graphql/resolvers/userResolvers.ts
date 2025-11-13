@@ -45,6 +45,7 @@ export const userResolvers = {
       }
     ): Promise<Omit<User, "password">> => {
       const user = await em.findOne(User, req.session.userId);
+      console.log(user, "USER ME TEST", req.session.userId);
       return sanitizeUser(user);
     },
   },
@@ -135,7 +136,6 @@ export const userResolvers = {
       }
 
       req.session.userId = user.id;
-      console.log(req.session, "SESSION TEST")
       return sanitizeUser(user);
     },
     sendResetPasswordEmail: async (
