@@ -7,7 +7,10 @@ let redisStore: RedisStore;
 export async function getRedisClient() {
   if (redisClient && redisClient.isOpen) return redisClient;
 
-  redisClient = createClient({ url: process.env.DB_REDIS_URL });
+  redisClient = createClient({
+    url: process.env.DB_REDIS_URL,
+    socket: { tls: true, rejectUnauthorized: false },
+  });
 
   redisClient.on("error", (err) => console.error("Redis error:", err));
 
