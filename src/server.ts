@@ -6,15 +6,17 @@ import { connectToMongo, initORM } from "./db.js";
 import { TrimStringsPlugin } from "./graphql/plugins/trimStrings.js";
 import session from "express-session";
 import { RedisStore } from "connect-redis";
-import redisClient from "./redis.js";
+import { getRedisClient } from "./redis.js";
 import cors from "cors";
 
 export async function createServer() {
   await connectToMongo();
-  
+
   const orm = await initORM();
 
   const app = express();
+
+  const redisClient = await getRedisClient();
 
   const allowedOrigins = [
     process.env.FRONTEND_URL,
