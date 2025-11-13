@@ -23,15 +23,10 @@ const main = async () => {
 main().catch((err) => console.error(err));
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!app) {
-    app = await createServer();
-  }
+  if (!app) app = await createServer();
 
-  const expressReq = req as unknown as Request;
-  const expressRes = res as unknown as Response;
-
-  await new Promise<void>((resolve, reject) => {
-    app(expressReq, expressRes, (err) => {
+  return new Promise<void>((resolve, reject) => {
+    app(req as unknown as Request, res as unknown as Response, (err) => {
       if (err) return reject(err);
       resolve();
     });
