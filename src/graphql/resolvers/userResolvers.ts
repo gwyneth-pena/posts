@@ -135,6 +135,7 @@ export const userResolvers = {
       }
 
       req.session.userId = user.id;
+      console.log(req.session, "SESSION TEST")
       return sanitizeUser(user);
     },
     sendResetPasswordEmail: async (
