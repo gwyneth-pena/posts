@@ -45,6 +45,7 @@ export const userResolvers = {
       }
     ): Promise<Omit<User, "password">> => {
       const user = await em.findOne(User, req.session.userId);
+      console.log(user, "USER ME TEST");
       return sanitizeUser(user);
     },
   },
