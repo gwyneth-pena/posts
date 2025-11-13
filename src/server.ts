@@ -45,7 +45,7 @@ export async function createServer() {
         httpOnly: true,
         maxAge:
           Number(process.env.SESSION_EXPIRY_TIME || 0) || 1000 * 60 * 60 * 2,
-        secure: process.env.NODE_ENV?.toLowerCase()?.includes("prod"),
+        secure: true,
         sameSite: "none",
       },
     })
