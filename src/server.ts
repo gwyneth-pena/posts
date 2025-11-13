@@ -44,6 +44,7 @@ export async function createServer() {
       resave: false,
       saveUninitialized: false,
       cookie: {
+        path:'/',
         httpOnly: true,
         maxAge:
           Number(process.env.SESSION_EXPIRY_TIME || 0) || 1000 * 60 * 60 * 2,
