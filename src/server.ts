@@ -64,7 +64,8 @@ export async function createServer() {
     res.clearCookie("session_id", {
       httpOnly: true,
       secure: isProd,
-      sameSite: "none",
+      sameSite: isProd ? "none" : "lax",
+      path: "/",
     });
     res.json({ success: true });
   });
