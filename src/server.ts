@@ -36,10 +36,9 @@ export async function createServer() {
 
   const isProd = process.env.NODE_ENV?.toLowerCase()?.includes("prod");
 
-  if (isProd){
-      app.set("trust proxy", 1);
+  if (isProd) {
+    app.set("trust proxy", 1);
   }
-
 
   app.use(
     session({
@@ -49,7 +48,7 @@ export async function createServer() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        path:'/',
+        path: "/",
         httpOnly: true,
         maxAge:
           Number(process.env.SESSION_EXPIRY_TIME || 0) || 1000 * 60 * 60 * 2,
@@ -59,15 +58,24 @@ export async function createServer() {
     })
   );
 
-  app.post("/logout", async (req: any, res: any) => {
-    await req.session.destroy();
-    res.clearCookie("session_id", {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
-      path: "/",
+  app.post("/logout", (req: any, res) => {
+    const isProd = process.env.NODE_ENV?.toLowerCase()?.includes("prod");
+
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Session destroy error:", err);
+        return res.status(500).json({ success: false });
+      }
+
+      res.clearCookie("session_id", {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+        path: "/",
+      });
+
+      res.json({ success: true });
     });
-    res.json({ success: true });
   });
 
   const server = new ApolloServer({
