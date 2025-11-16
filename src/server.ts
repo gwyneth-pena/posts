@@ -59,7 +59,6 @@ export async function createServer() {
   );
 
   app.post("/logout", (req: any, res) => {
-    const isProd = process.env.NODE_ENV?.toLowerCase()?.includes("prod");
 
     req.session.destroy((err:any) => {
       if (err) {
