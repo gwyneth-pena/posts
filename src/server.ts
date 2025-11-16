@@ -34,7 +34,12 @@ export async function createServer() {
     })
   );
 
-  app.set("trust proxy", 1);
+  const isProd = process.env.NODE_ENV?.toLowerCase()?.includes("prod");
+
+  if (isProd){
+      app.set("trust proxy", 1);
+  }
+
 
   app.use(
     session({
@@ -48,8 +53,8 @@ export async function createServer() {
         httpOnly: true,
         maxAge:
           Number(process.env.SESSION_EXPIRY_TIME || 0) || 1000 * 60 * 60 * 2,
-        secure: process.env.NODE_ENV?.toLowerCase()?.includes("prod"),
-        sameSite: "none",
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
       },
     })
   );
@@ -58,7 +63,7 @@ export async function createServer() {
     await req.session.destroy();
     res.clearCookie("session_id", {
       httpOnly: true,
-      secure: process.env.NODE_ENV?.toLowerCase()?.includes("prod"),
+      secure: isProd,
       sameSite: "none",
     });
     res.json({ success: true });
