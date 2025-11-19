@@ -3,8 +3,9 @@ import "dotenv/config";
 import { createServer } from "./server.js";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import type { Application, Request, Response } from "express";
+import { envConfig } from "./config.env.js";
 
-const isLocal = process.env.NODE_ENV === "development";
+const isLocal = envConfig.NODE_ENV === "development";
 
 let app: Application;
 
@@ -12,8 +13,8 @@ const main = async () => {
   app = await createServer();
 
   if (isLocal) {
-    const PORT = Number(process.env.PORT) || 4000;
-    const HOST = process.env.HOST || "localhost";
+    const PORT = Number(envConfig.PORT) || 4000;
+    const HOST = envConfig.HOST || "localhost";
     app.listen(PORT, HOST, () => {
       console.log(`Server running at http://${HOST}:${PORT}`);
     });

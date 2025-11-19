@@ -6,6 +6,7 @@ import { sendMail } from "../../email/mailer.js";
 import { PasswordToken } from "../../schema/passwordTokenSchema.js";
 import crypto from "crypto";
 import session from "express-session";
+import { envConfig } from "../../config.env.js";
 
 export const userResolvers = {
   Query: {
@@ -166,7 +167,7 @@ export const userResolvers = {
         expiresAt: new Date(Date.now() + 1000 * 60 * 30),
       });
       await doc.save();
-      const resetLink = `${process.env.FRONTEND_URL}/forgot-password?token=${rawToken}&selector=${selector}`;
+      const resetLink = `${envConfig.FRONTEND_URL}/forgot-password?token=${rawToken}&selector=${selector}`;
       await sendMail(email, resetLink);
       return true;
     },

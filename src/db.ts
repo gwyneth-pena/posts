@@ -1,17 +1,17 @@
 import { MikroORM } from "@mikro-orm/core";
 import { MySqlDriver } from "@mikro-orm/mysql";
 import config from "./mikro-orm.config.js";
-import 'dotenv/config';
+import "dotenv/config";
 import mongoose from "mongoose";
+import { envConfig } from "./config.env.js";
 
 let orm: MikroORM<MySqlDriver>;
-
 
 export async function initORM() {
   if (!orm) {
     orm = await MikroORM.init<MySqlDriver>(config);
     const diff = await orm.getSchemaGenerator().getUpdateSchemaSQL();
-    if(diff){
+    if (diff) {
       await orm.getSchemaGenerator().createSchema();
       await orm.getMigrator().up();
     }
@@ -29,7 +29,7 @@ export function getORM() {
 
 export async function connectToMongo() {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(envConfig.MONGO_URI);
     console.log("MongoDB connected");
   } catch (err) {
     throw new Error("MongoDB connection failed");
