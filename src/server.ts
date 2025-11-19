@@ -61,7 +61,13 @@ export async function createServer() {
 
   app.post("/logout", (req: any, res) => {
     req.session.destroy((err: any) => {
-      console.log('on logout')
+      console.log("on logout", {
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+        domain: isProd ? ".yourdomain.com" : undefined,
+        path: "/",
+      });
+
       if (err) {
         console.error("Session destroy error:", err);
         return res.status(500).json({ success: false });
