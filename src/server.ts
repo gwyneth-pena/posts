@@ -77,7 +77,6 @@ export async function createServer() {
         httpOnly: true,
         secure: isProd,
         sameSite: isProd ? "none" : "lax",
-        domain: isProd ? ".vercel.app" : undefined,
         path: "/",
       });
 
