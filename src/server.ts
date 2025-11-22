@@ -74,6 +74,11 @@ export async function createServer() {
         expires: new Date(0),
       });
 
+      res.setHeader(
+        "Set-Cookie",
+        `session_id=; Path=/; Domain=${envConfig.FRONTEND_URL} HttpOnly; SameSite=None; Secure; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
+      );
+
       res.json({ success: true });
     });
   });
