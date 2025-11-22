@@ -78,6 +78,7 @@ export async function createServer() {
         secure: isProd,
         sameSite: isProd ? "none" : "lax",
         path: "/",
+        expires: new Date(0)
       });
 
       res.json({ success: true });
