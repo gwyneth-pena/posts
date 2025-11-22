@@ -61,13 +61,6 @@ export async function createServer() {
 
   app.post("/logout", (req: any, res) => {
     req.session.destroy((err: any) => {
-      console.log("on logout", {
-        secure: isProd,
-        sameSite: isProd ? "none" : "lax",
-        domain: isProd ? ".yourdomain.com" : undefined,
-        path: "/",
-      });
-
       if (err) {
         console.error("Session destroy error:", err);
         return res.status(500).json({ success: false });
@@ -78,8 +71,13 @@ export async function createServer() {
         secure: isProd,
         sameSite: isProd ? "none" : "lax",
         path: "/",
-        expires: new Date(0)
+        expires: new Date(0),
       });
+
+      res.setHeader(
+        "Set-Cookie",
+        `session_id=; Path=/; HttpOnly; SameSite=None; Secure; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
+      );
 
       res.json({ success: true });
     });
