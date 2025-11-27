@@ -9,6 +9,7 @@ import { RedisStore } from "connect-redis";
 import { getRedisClient } from "./redis.js";
 import cors from "cors";
 import { envConfig } from "./config.env.js";
+import cookieParser from "cookie-parser";
 
 export async function createServer() {
   await connectToMongo();
@@ -63,11 +64,11 @@ export async function createServer() {
   );
 
   app.post("/logout", async (req: any, res) => {
-    req.session.destroy((err: any) => {
-      if (err) console.error(err);
-      res.clearCookie("session_id");
-      res.json({ success: true });
-    });
+    const secret = envConfig.SECRET_KEY;
+    const signedCookie = req.sessionID;
+    const rawSessionId = cookieParser.signedCookie(signedCookie, secret);
+    await redisClient.del(rawSessionId);
+    res.clearCookie("session_id");
     return res.json({ success: true });
   });
 
