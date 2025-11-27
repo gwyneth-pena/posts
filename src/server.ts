@@ -67,7 +67,8 @@ export async function createServer() {
     }
 
     try {
-      await redisClient.del(`sess:${sessionId}`);
+      const res = await redisClient.del(`sess:${sessionId}`);
+      console.log("Redis delete result:", res);
     } catch (err) {
       console.error("Redis delete error:", err);
       return res.status(500).json({ success: false });
