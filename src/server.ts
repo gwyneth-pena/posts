@@ -57,15 +57,15 @@ export async function createServer() {
 
   app.post("/logout", async (req, res) => {
     if (!req.sessionID) return res.json({ success: true });
-
+    console.log("Logging out user", req.sessionID);
     try {
       await redisStore.destroy(req.sessionID);
       req.session.destroy(() => {});
       res.clearCookie("session_id", {
         path: "/",
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
       });
       return res.json({ success: true });
     } catch (err) {
