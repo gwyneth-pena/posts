@@ -36,7 +36,6 @@ export async function createServer() {
   );
 
   const isProd = envConfig.NODE_ENV?.toLowerCase()?.includes("prod");
-  const frontendDomain = new URL(process.env.FRONTEND_URL).hostname;
 
   if (isProd) {
     app.set("trust proxy", 1);
@@ -68,6 +67,7 @@ export async function createServer() {
 
     await redisClient.del(sessionId);
     res.clearCookie("session_id");
+
     res.json({ success: true });
   });
 
