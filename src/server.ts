@@ -65,7 +65,7 @@ export async function createServer() {
           }
         }
         return crypto.randomUUID();
-      },,
+      },
     })
   );
 
