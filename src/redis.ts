@@ -2,26 +2,15 @@ import { createClient } from "redis";
 import { RedisStore } from "connect-redis";
 import { envConfig } from "./config.env.js";
 
-let redisClient: ReturnType<typeof createClient>;
-let redisStore: RedisStore;
+export const redisClient = createClient({ url: envConfig.DB_REDIS_URL });
+redisClient.on("error", (err) => console.error("Redis error:", err));
 
-export async function getRedisClient() {
-  if (redisClient && redisClient.isOpen) return redisClient;
-
-  redisClient = createClient({ url: envConfig.DB_REDIS_URL });
-
-  redisClient.on("error", (err) => console.error("Redis error:", err));
-
-  await redisClient.connect();
-  console.log("Redis connected");
-
-  return redisClient;
-}
+export let redisStore: RedisStore;
 
 export async function getRedisStore() {
   if (!redisStore) {
-    const client = await getRedisClient();
-    redisStore = new RedisStore({ client });
+    redisStore = new RedisStore({ client: redisClient, prefix: "sess:" });
   }
+  if (!redisClient.isOpen) await redisClient.connect();
   return redisStore;
 }

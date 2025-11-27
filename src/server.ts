@@ -5,11 +5,10 @@ import { resolvers } from "./graphql/resolvers/resolvers.js";
 import { connectToMongo, initORM } from "./db.js";
 import { TrimStringsPlugin } from "./graphql/plugins/trimStrings.js";
 import session from "express-session";
-import { RedisStore } from "connect-redis";
-import { getRedisClient } from "./redis.js";
 import cors from "cors";
 import { envConfig } from "./config.env.js";
 import cookieParser from "cookie-parser";
+import { getRedisStore, redisClient } from "./redis.js";
 
 export async function createServer() {
   await connectToMongo();
@@ -17,11 +16,6 @@ export async function createServer() {
   const orm = await initORM();
 
   const app = express();
-
-  const redisClient = await getRedisClient();
-  if (!redisClient) {
-    console.error("Redis client not initialized");
-  }
 
   const allowedOrigins = [
     envConfig.FRONTEND_URL,
@@ -48,7 +42,7 @@ export async function createServer() {
   app.use(
     session({
       name: "session_id",
-      store: new RedisStore({ client: redisClient, prefix: "sess:" }),
+      store: getRedisStore(),
       secret: envConfig.SECRET_KEY,
       resave: false,
       saveUninitialized: false,
@@ -62,15 +56,29 @@ export async function createServer() {
     })
   );
 
-  app.post("/logout", async (req: any, res) => {
-    const secret = envConfig.SECRET_KEY;
-    const signedCookie = req.sessionID;
-    console.log("Logging out", signedCookie, secret);
-    const rawSessionId = cookieParser.signedCookie(signedCookie, secret);
-    console.log("Logging out", rawSessionId, signedCookie, secret);
-    await redisClient.del(`sess:${rawSessionId}`);
-    res.clearCookie("session_id");
-    return res.json({ success: true });
+  app.post("/logout", async (req: any, res: any) => {
+    if (!req.sessionID) return res.json({ success: true });
+
+    try {
+      const deleted = await redisClient.del(`sess:${req.sessionID}`);
+      console.log("Deleted Redis session:", deleted);
+
+      req.session.destroy((err) => {
+        if (err) console.error("Session destroy error:", err);
+      });
+
+      res.clearCookie("session_id", {
+        path: "/",
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+      });
+
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("Logout error:", err);
+      return res.status(500).json({ success: false });
+    }
   });
 
   const server = new ApolloServer({
