@@ -66,18 +66,16 @@ export async function createServer() {
         return res.status(500).json({ success: false });
       }
 
+      const domain = new URL(envConfig.FRONTEND_URL).hostname;
+
       res.clearCookie("session_id", {
         httpOnly: true,
         secure: isProd,
         sameSite: isProd ? "none" : "lax",
         path: "/",
         expires: new Date(0),
+        domain: domain,
       });
-
-      res.setHeader(
-        "Set-Cookie",
-        `session_id=; Path=/; Domain=${envConfig.FRONTEND_URL} HttpOnly; SameSite=None; Secure; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
-      );
 
       res.json({ success: true });
     });
