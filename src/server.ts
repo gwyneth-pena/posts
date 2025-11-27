@@ -7,7 +7,7 @@ import { TrimStringsPlugin } from "./graphql/plugins/trimStrings.js";
 import session from "express-session";
 import cors from "cors";
 import { envConfig } from "./config.env.js";
-import { redisStore } from "./redis.js";
+import { getRedisStore } from "./redis.js";
 
 export async function createServer() {
   await connectToMongo();
@@ -41,7 +41,7 @@ export async function createServer() {
   app.use(
     session({
       name: "session_id",
-      store: redisStore,
+      store: await getRedisStore(),
       secret: envConfig.SECRET_KEY,
       resave: false,
       saveUninitialized: false,
@@ -59,7 +59,8 @@ export async function createServer() {
     if (!req.sessionID) return res.json({ success: true });
     console.log("Logging out user", req.sessionID);
     try {
-      await redisStore.destroy(req.sessionID);
+      const store = await getRedisStore();
+      store.destroy(req.sessionID);
       req.session.destroy(() => {});
       res.clearCookie("session_id", {
         path: "/",
