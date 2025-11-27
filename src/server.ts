@@ -24,8 +24,6 @@ export async function createServer() {
     "https://studio.apollographql.com",
   ];
 
-  const cookieDomain = new URL(envConfig.FRONTEND_URL).hostname;
-
   app.use(
     cors({
       origin: function (origin, callback) {
@@ -52,7 +50,6 @@ export async function createServer() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        domain: frontendDomain,
         path: "/",
         httpOnly: true,
         maxAge:
@@ -71,21 +68,12 @@ export async function createServer() {
       }
 
       res.clearCookie("session_id", {
-        domain: frontendDomain,
         httpOnly: true,
         secure: isProd,
         sameSite: isProd ? "none" : "lax",
         path: "/",
         expires: new Date(0),
       });
-      console.log({
-        domain: frontendDomain,
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? "none" : "lax",
-        path: "/",
-        expires: new Date(0),
-      })
       res.json({ success: true });
     });
   });
