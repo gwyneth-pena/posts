@@ -44,7 +44,7 @@ export async function createServer() {
   app.use(
     session({
       name: "session_id",
-      store: new RedisStore({ client: redisClient }),
+      store: new RedisStore({ client: redisClient, prefix: "sess:" }),
       secret: envConfig.SECRET_KEY,
       resave: false,
       saveUninitialized: false,
