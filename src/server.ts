@@ -8,6 +8,7 @@ import session from "express-session";
 import cors from "cors";
 import { envConfig } from "./config.env.js";
 import { getRedisStore } from "./redis.js";
+import cookie from "cookie";
 
 export async function createServer() {
   await connectToMongo();
@@ -59,24 +60,23 @@ export async function createServer() {
   );
 
   app.post("/logout", async (req, res) => {
-    console.log("LOGOUT", req.sessionID);
-    if (!req.sessionID) return res.json({ success: true });
-    console.log("REQ SESSION ID =", req.sessionID);
+    const cookies = req.headers.cookie ? cookie.parse(req.headers.cookie) : {};
+    const rawSessionId = cookies["session_id"];
+    if (!rawSessionId) return res.json({ success: true });
 
-    try {
-      await store.destroy(req.sessionID);
-      req.session.destroy(() => {});
-      res.clearCookie("session_id", {
-        path: "/",
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? "none" : "lax",
-      });
-      return res.json({ success: true });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ success: false });
-    }
+    const sid = rawSessionId.startsWith("s:")
+      ? rawSessionId.slice(2).split(".")[0]
+      : rawSessionId;
+
+    await store.destroy(sid);
+    req.session.destroy(() => {});
+    res.clearCookie("session_id", {
+      path: "/",
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+    });
+    return res.json({ success: true });
   });
 
   const server = new ApolloServer({
