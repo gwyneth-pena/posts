@@ -67,7 +67,7 @@ export async function createServer() {
     const secret = envConfig.SECRET_KEY;
     const signedCookie = req.cookies.session_id;
     const rawSessionId = cookieParser.signedCookie(signedCookie, secret);
-    console.log("Logging out", rawSessionId, signedCookie);
+    console.log("Logging out", rawSessionId, signedCookie, secret);
     await redisClient.del(`sess:${rawSessionId}`);
     res.clearCookie("session_id");
     return res.json({ success: true });
