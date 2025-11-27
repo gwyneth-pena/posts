@@ -68,6 +68,7 @@ export async function createServer() {
 
     await redisClient.del(sessionId);
     res.clearCookie("session_id");
+    res.json({ success: true });
   });
 
   const server = new ApolloServer({
