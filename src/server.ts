@@ -59,7 +59,7 @@ export async function createServer() {
   app.post("/logout", async (req, res) => {
     if (!req.sessionID) return res.json({ success: true });
     try {
-      store.destroy(req.sessionID);
+      await store.destroy(req.sessionID);
       req.session.destroy(() => {});
       res.clearCookie("session_id", {
         path: "/",
