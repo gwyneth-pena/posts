@@ -33,6 +33,7 @@ export async function createServer() {
   );
 
   const isProd = envConfig.NODE_ENV?.toLowerCase()?.includes("prod");
+  const store = await getRedisStore();
 
   if (isProd) {
     app.set("trust proxy", 1);
@@ -41,7 +42,7 @@ export async function createServer() {
   app.use(
     session({
       name: "session_id",
-      store: await getRedisStore(),
+      store: store,
       secret: envConfig.SECRET_KEY,
       resave: false,
       saveUninitialized: false,
@@ -58,7 +59,6 @@ export async function createServer() {
   app.post("/logout", async (req, res) => {
     if (!req.sessionID) return res.json({ success: true });
     try {
-      const store = await getRedisStore();
       store.destroy(req.sessionID);
       req.session.destroy(() => {});
       res.clearCookie("session_id", {
