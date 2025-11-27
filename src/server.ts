@@ -18,6 +18,9 @@ export async function createServer() {
   const app = express();
 
   const redisClient = await getRedisClient();
+  if (!redisClient) {
+    console.error("Redis client not initialized");
+  }
 
   const allowedOrigins = [
     envConfig.FRONTEND_URL,
