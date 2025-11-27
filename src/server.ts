@@ -7,7 +7,7 @@ import { TrimStringsPlugin } from "./graphql/plugins/trimStrings.js";
 import session from "express-session";
 import cors from "cors";
 import { envConfig } from "./config.env.js";
-import { getRedisStore } from "./redis.js";
+import { getRedisStore, getRedisClient } from "./redis.js";
 import cookie from "cookie";
 
 export async function createServer() {
@@ -35,6 +35,7 @@ export async function createServer() {
 
   const isProd = envConfig.NODE_ENV?.toLowerCase()?.includes("prod");
   const store = await getRedisStore();
+  const redisClient = await getRedisClient();
 
   if (isProd) {
     app.set("trust proxy", 1);
@@ -60,6 +61,8 @@ export async function createServer() {
   );
 
   app.post("/logout", async (req, res) => {
+    const keys = await redisClient.keys("sess:*");
+    console.log("Deleting keys", keys, req.sessionID, req.headers.cookie);
     const cookies = req.headers.cookie ? cookie.parse(req.headers.cookie) : {};
     const rawSessionId = cookies["session_id"];
     if (!rawSessionId) return res.json({ success: true });
