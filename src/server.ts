@@ -8,6 +8,7 @@ import session from "express-session";
 import cors from "cors";
 import { envConfig } from "./config.env.js";
 import { getRedisStore } from "./redis.js";
+import crypto from "crypto";
 
 export async function createServer() {
   await connectToMongo();
