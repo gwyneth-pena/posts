@@ -65,7 +65,7 @@ export async function createServer() {
 
   app.post("/logout", async (req: any, res) => {
     const secret = envConfig.SECRET_KEY;
-    const signedCookie = req.sessionID;
+    const signedCookie = req.cookies.session_id;
     console.log("Logging out", signedCookie, req.cookies.session_id);
     const rawSessionId = cookieParser.signedCookie(signedCookie, secret);
     console.log("Logging out raw", rawSessionId);
