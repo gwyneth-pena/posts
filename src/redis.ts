@@ -43,6 +43,7 @@ export async function getRedisStore(): Promise<session.Store> {
       }
 
       async destroy(sid: string, cb?: (err?: any) => void) {
+        console.log("Destroying session", sid);
         try {
           await client.del(this.prefix + sid);
           cb?.();
