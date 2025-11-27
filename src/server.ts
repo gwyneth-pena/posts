@@ -56,7 +56,16 @@ export async function createServer() {
         signed: false,
         sameSite: isProd ? "none" : "lax",
       },
-      genid:  () => crypto.randomUUID(),
+      genid:  (req) => {
+        const cookieHeader = req.headers.cookie;
+        if (cookieHeader) {
+          const match = cookieHeader.match(/session_id=s%3A([^\.]+)/);
+          if (match) {
+            return match[1]; 
+          }
+        }
+        return crypto.randomUUID();
+      },,
     })
   );
 
