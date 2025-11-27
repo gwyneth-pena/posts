@@ -52,7 +52,9 @@ export async function createServer() {
         maxAge:
           Number(envConfig.SESSION_EXPIRY_TIME || 0) || 1000 * 60 * 60 * 2,
         secure: isProd,
+        signed: false
       },
+      genid:  () => crypto.randomUUID(),
     })
   );
 
