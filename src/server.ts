@@ -8,7 +8,6 @@ import session from "express-session";
 import cors from "cors";
 import { envConfig } from "./config.env.js";
 import { getRedisStore } from "./redis.js";
-import crypto from "crypto";
 
 export async function createServer() {
   await connectToMongo();
@@ -55,16 +54,6 @@ export async function createServer() {
         secure: isProd,
         signed: false,
         sameSite: isProd ? "none" : "lax",
-      },
-      genid:  (req) => {
-        const cookieHeader = req.headers.cookie;
-        if (cookieHeader) {
-          const match = cookieHeader.match(/session_id=s%3A([^\.]+)/);
-          if (match) {
-            return match[1]; 
-          }
-        }
-        return crypto.randomUUID();
       },
     })
   );
