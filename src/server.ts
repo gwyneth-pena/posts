@@ -38,6 +38,7 @@ export async function createServer() {
   );
 
   const isProd = envConfig.NODE_ENV?.toLowerCase()?.includes("prod");
+  const frontendDomain = new URL(process.env.FRONTEND_URL).hostname;
 
   if (isProd) {
     app.set("trust proxy", 1);
@@ -51,7 +52,7 @@ export async function createServer() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        domain: cookieDomain,
+        domain: frontendDomain,
         path: "/",
         httpOnly: true,
         maxAge:
@@ -70,14 +71,21 @@ export async function createServer() {
       }
 
       res.clearCookie("session_id", {
-        domain: cookieDomain,
+        domain: frontendDomain,
         httpOnly: true,
         secure: isProd,
         sameSite: isProd ? "none" : "lax",
         path: "/",
         expires: new Date(0),
       });
-
+      console.log({
+        domain: frontendDomain,
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+        path: "/",
+        expires: new Date(0),
+      })
       res.json({ success: true });
     });
   });
