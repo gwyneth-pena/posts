@@ -61,6 +61,8 @@ export async function createServer() {
 
   app.post("/logout", async (req: any, res) => {
     const sessionId = req.sessionID;
+    console.log(req.session);
+    console.log("Session ID:", sessionId);
 
     if (!sessionId) {
       return res.json({ success: true });
