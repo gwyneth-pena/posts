@@ -1,16 +1,41 @@
+import session from "express-session";
 import { createClient } from "redis";
-import { RedisStore } from "connect-redis";
-import { envConfig } from "./config.env.js";
 
-export const redisClient = createClient({ url: envConfig.DB_REDIS_URL });
-redisClient.on("error", (err) => console.error("Redis error:", err));
+const redisClient = createClient({ url: process.env.DB_REDIS_URL });
+redisClient.on("error", console.error);
+await redisClient.connect();
 
-export let redisStore: RedisStore;
+class RedisStoreManual extends session.Store {
+  prefix = "sess:";
 
-export async function getRedisStore() {
-  if (!redisStore) {
-    redisStore = new RedisStore({ client: redisClient, prefix: "sess:" });
+  async get(sid: string, callback: (err: any, session?: any) => void) {
+    try {
+      const data: any = await redisClient.get(this.prefix + sid);
+      callback(null, data ? JSON.parse(data) : null);
+    } catch (err) {
+      callback(err);
+    }
   }
-  if (!redisClient.isOpen) await redisClient.connect();
-  return redisStore;
+
+  async set(sid: string, sess: any, callback?: (err?: any) => void) {
+    try {
+      await redisClient.set(this.prefix + sid, JSON.stringify(sess), {
+        EX: sess.cookie?.maxAge ? Math.floor(sess.cookie.maxAge / 1000) : 7200,
+      });
+      callback?.();
+    } catch (err) {
+      callback?.(err);
+    }
+  }
+
+  async destroy(sid: string, callback?: (err?: any) => void) {
+    try {
+      await redisClient.del(this.prefix + sid);
+      callback?.();
+    } catch (err) {
+      callback?.(err);
+    }
+  }
 }
+
+export const redisStore = new RedisStoreManual();

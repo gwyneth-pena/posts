@@ -7,8 +7,7 @@ import { TrimStringsPlugin } from "./graphql/plugins/trimStrings.js";
 import session from "express-session";
 import cors from "cors";
 import { envConfig } from "./config.env.js";
-import cookieParser from "cookie-parser";
-import { getRedisStore, redisClient } from "./redis.js";
+import { redisStore } from "./redis.js";
 
 export async function createServer() {
   await connectToMongo();
@@ -42,7 +41,7 @@ export async function createServer() {
   app.use(
     session({
       name: "session_id",
-      store: getRedisStore(),
+      store: redisStore,
       secret: envConfig.SECRET_KEY,
       resave: false,
       saveUninitialized: false,
@@ -56,27 +55,21 @@ export async function createServer() {
     })
   );
 
-  app.post("/logout", async (req: any, res: any) => {
+  app.post("/logout", async (req, res) => {
     if (!req.sessionID) return res.json({ success: true });
 
     try {
-      const deleted = await redisClient.del(`sess:${req.sessionID}`);
-      console.log("Deleted Redis session:", deleted);
-
-      req.session.destroy((err) => {
-        if (err) console.error("Session destroy error:", err);
-      });
-
+      await redisStore.destroy(req.sessionID);
+      req.session.destroy(() => {});
       res.clearCookie("session_id", {
         path: "/",
         httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? "none" : "lax",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       });
-
       return res.json({ success: true });
     } catch (err) {
-      console.error("Logout error:", err);
+      console.error(err);
       return res.status(500).json({ success: false });
     }
   });
