@@ -61,7 +61,10 @@ export async function createServer() {
   );
 
   app.post("/logout", async (req, res) => {
+    console.log("LOGOUT", req.sessionID);
     if (!req.sessionID) return res.json({ success: true });
+    console.log("REQ SESSION ID =", req.sessionID);
+
     try {
       await store.destroy(req.sessionID);
       req.session.destroy(() => {});
