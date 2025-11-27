@@ -60,22 +60,14 @@ export async function createServer() {
     })
   );
 
-  app.post("/logout", (req: any, res) => {
-    req.session.destroy((err: any) => {
-      if (err) {
-        console.error("Session destroy error:", err);
-        return res.status(500).json({ success: false });
-      }
-
-      res.clearCookie("session_id", {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? "none" : "lax",
-        path: "/",
-        expires: new Date(0),
-      });
+  app.post("/logout", async (req: any, res) => {
+    const sessionId = req.cookies["session_id"];
+    if (!sessionId) {
       res.json({ success: true });
-    });
+    }
+
+    await redisClient.del(sessionId);
+    res.clearCookie("session_id");
   });
 
   const server = new ApolloServer({
