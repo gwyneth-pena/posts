@@ -146,10 +146,33 @@ export const userResolvers = {
         });
       });
 
-      const redis = await getRedisClient();
-      await redis.set(`user_sessions:${user.id}`, req.session.id);
-
       return sanitizeUser(user);
+    },
+    logoutUser: async (
+      _: any,
+      __: any,
+      {
+        req,
+        res,
+      }: {
+        req: Request & { session: session.Session & { userId?: number } };
+        res: any;
+      }
+    ): Promise<Boolean> => {
+      const isProd = process.env.NODE_ENV?.toLowerCase()?.includes("prod");
+
+      req.session.destroy((err) => {
+        if (err) console.error(err);
+      });
+
+      res.clearCookie("session_id", {
+        path: "/",
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+      });
+
+      return true;
     },
     sendResetPasswordEmail: async (
       _: any,

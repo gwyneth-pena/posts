@@ -60,25 +60,6 @@ export async function createServer() {
     })
   );
 
-  app.post("/logout", async (req: any, res: any) => {
-    const userId = req.session.userId;
-    console.log("Logging out user", req.session);
-    if (!userId) return res.json({ success: true });
-
-    const sessionId = await redisClient.get(`user_sessions:${userId}`);
-    if (!sessionId) return res.json({ success: true });
-    await redisClient.del(`sess:${sessionId}`);
-    await redisClient.del(`user_sessions:${userId}`);
-
-    res.clearCookie("session_id", {
-      path: "/",
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
-    });
-    return res.json({ success: true });
-  });
-
   const server = new ApolloServer({
     typeDefs,
     resolvers,

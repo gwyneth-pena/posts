@@ -19,6 +19,7 @@ export const typeDefs = `
     updateUser(id: ID!, data: ModifyUserInput): User!
     deleteUser(id: ID!): Boolean!
     loginUser(username: String!, password: String!): User
+    logoutUser: Boolean!
     sendResetPasswordEmail(email: String!): Boolean!
     resetPassword(selector: String!, token: String!, password: String!): Boolean!
     createComment(text: String!, postId: ID!, parentId: ID): Comment!
