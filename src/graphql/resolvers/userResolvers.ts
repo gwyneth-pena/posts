@@ -7,6 +7,7 @@ import { PasswordToken } from "../../schema/passwordTokenSchema.js";
 import crypto from "crypto";
 import session from "express-session";
 import { envConfig } from "../../config.env.js";
+import { getRedisClient } from "../../redis.js";
 
 export const userResolvers = {
   Query: {
@@ -144,6 +145,9 @@ export const userResolvers = {
           resolve();
         });
       });
+
+      const redis = await getRedisClient();
+      await redis.set(`user_sessions:${user.id}`, req.session.id);
 
       return sanitizeUser(user);
     },

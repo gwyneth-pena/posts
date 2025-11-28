@@ -60,19 +60,15 @@ export async function createServer() {
     })
   );
 
-  app.post("/logout", async (req, res) => {
-    const keys = await redisClient.keys("sess:*");
-    console.log("Deleting keys", keys, req.sessionID, req.headers.cookie);
-    const cookies = req.headers.cookie ? cookie.parse(req.headers.cookie) : {};
-    const rawSessionId = cookies["session_id"];
-    if (!rawSessionId) return res.json({ success: true });
+  app.post("/logout", async (req: any, res: any) => {
+    const userId = req.session.userId;
+    if (!userId) return res.json({ success: true });
 
-    const sid = rawSessionId.startsWith("s:")
-      ? rawSessionId.slice(2).split(".")[0]
-      : rawSessionId;
+    const sessionId = await redisClient.get(`user_sessions:${userId}`);
+    if (!sessionId) return res.json({ success: true });
+    await redisClient.del(`sess:${sessionId}`);
+    await redisClient.del(`user_sessions:${userId}`);
 
-    await store.destroy(sid);
-    req.session.destroy(() => {});
     res.clearCookie("session_id", {
       path: "/",
       httpOnly: true,
