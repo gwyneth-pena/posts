@@ -62,6 +62,7 @@ export async function createServer() {
 
   app.post("/logout", async (req: any, res: any) => {
     const userId = req.session.userId;
+    console.log("Logging out user", userId);
     if (!userId) return res.json({ success: true });
 
     const sessionId = await redisClient.get(`user_sessions:${userId}`);
