@@ -132,7 +132,7 @@ export const userResolvers = {
         req: Request & { session: session.Session & { userId?: number } };
       }
     ): Promise<Omit<User, "password">> => {
-      const user = await em.findOne(User, { username });
+      const user = await em.findOne(User, { username: username.toLowerCase() });
       if (!user) {
         throw new Error("User not found.");
       }
