@@ -70,7 +70,7 @@ export const userResolvers = {
     ): Promise<Omit<User, "password">> => {
       const hashedPassword = await argon2.hash(data.password);
       const user = em.create(User, {
-        username: data.username, password: hashedPassword, email: data.email,
+        username: data.username?.toLowerCase(), password: hashedPassword, email: data.email?.toLowerCase(),
         createdAt: "",
         updatedAt: "",
         posts: 0
