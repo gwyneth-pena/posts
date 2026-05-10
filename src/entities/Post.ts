@@ -18,7 +18,7 @@ export class Post {
   @Property()
   title: string = "";
 
-  @Property({ columnType: "longtext" })
+  @Property({ columnType: "text" })
   text!: string;
 
   @Property({ length: 255, nullable: false, unique: true })

@@ -1,21 +1,23 @@
-import { MikroORM } from "@mikro-orm/core";
-import { MySqlDriver } from "@mikro-orm/mysql";
 import config from "./mikro-orm.config.js";
 import "dotenv/config";
 import mongoose from "mongoose";
 import { envConfig } from "./config.env.js";
+import { PostgreSqlDriver } from "@mikro-orm/postgresql";
+import { MikroORM } from "@mikro-orm/core";
 
-let orm: MikroORM<MySqlDriver>;
+let orm: MikroORM;
 
 export async function initORM() {
   if (!orm) {
-    orm = await MikroORM.init<MySqlDriver>(config);
-    const diff = await orm.getSchemaGenerator().getUpdateSchemaSQL();
+    orm = await MikroORM.init<PostgreSqlDriver>(config);
+    
+    const generator = orm.schema;
+    const diff = await generator.getUpdateSchemaSQL();
+    
     if (diff) {
-      await orm.getSchemaGenerator().createSchema();
-      await orm.getMigrator().up();
+      await generator.updateSchema();
+      await orm.migrator.up();
     }
-    console.log("MikroORM initialized!");
   }
   return orm;
 }

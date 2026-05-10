@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/core";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { Vote } from "../../entities/Vote.js";
 import { Post } from "../../entities/Post.js";
 
@@ -82,6 +82,8 @@ export const voteResolvers = {
         value,
         post: postId,
         user: req.session.userId,
+        createdAt: "",
+        updatedAt: ""
       });
       await em.persistAndFlush(vote);
       return vote;
@@ -138,6 +140,9 @@ export const voteResolvers = {
         post: postId,
         user: req.session.userId,
       });
+      if (!vote) {
+        throw new Error("Vote not found.");
+      }
       vote.value = value;
       await em.persistAndFlush(vote);
       return vote;

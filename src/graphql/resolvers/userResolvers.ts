@@ -1,13 +1,12 @@
 import { MikroORM } from "@mikro-orm/core";
 import { User } from "../../entities/User.js";
 import argon2 from "argon2";
-import { EntityManager } from "@mikro-orm/mysql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { sendMail } from "../../email/mailer.js";
 import { PasswordToken } from "../../schema/passwordTokenSchema.js";
 import crypto from "crypto";
 import session from "express-session";
 import { envConfig } from "../../config.env.js";
-import { getRedisClient } from "../../redis.js";
 
 export const userResolvers = {
   Query: {
@@ -23,13 +22,16 @@ export const userResolvers = {
       _: any,
       { id, username }: any,
       { em }: MikroORM
-    ): Promise<Omit<User, "password">> => {
-      let user: User;
+    ): Promise<Omit<User, "password"> | null> => {
+      let user: User | null = null;
       if (id) {
         user = await em.findOne(User, id);
       } else if (username) {
         user = await em.findOne(User, { username });
       }
+
+      if (!user) return null;
+
       return sanitizeUser(user);
     },
     userMe: async (
@@ -46,8 +48,9 @@ export const userResolvers = {
           };
         };
       }
-    ): Promise<Omit<User, "password">> => {
+    ): Promise<Omit<User, "password"> | null> => {
       const user = await em.findOne(User, req.session.userId);
+      if (!user) return null;
       return sanitizeUser(user);
     },
   },
@@ -56,7 +59,7 @@ export const userResolvers = {
       _: any,
       {
         data,
-      }: { data: { username: string; password: string; email?: string } },
+      }: { data: { username: string; password: string; email: string } },
       {
         em,
         req,
@@ -67,9 +70,10 @@ export const userResolvers = {
     ): Promise<Omit<User, "password">> => {
       const hashedPassword = await argon2.hash(data.password);
       const user = em.create(User, {
-        username: data.username?.toUpperCase(),
-        password: hashedPassword,
-        email: data.email,
+        username: data.username, password: hashedPassword, email: data.email,
+        createdAt: "",
+        updatedAt: "",
+        posts: 0
       });
       await em.persistAndFlush(user);
       req.session.userId = user.id;
@@ -90,7 +94,7 @@ export const userResolvers = {
         data,
       }: {
         id: number;
-        data: { username: string; password: string; email?: string };
+        data: { username: string; password: string; email: string };
       },
       { em }: MikroORM
     ): Promise<Omit<User, "password">> => {

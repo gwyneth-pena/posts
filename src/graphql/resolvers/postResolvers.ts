@@ -1,4 +1,6 @@
-import { EntityManager, MikroORM, raw } from "@mikro-orm/mysql";
+import { EntityManager } from "@mikro-orm/postgresql";
+import { expr } from "@mikro-orm/core";
+import { MikroORM } from "@mikro-orm/core";
 import { Post } from "../../entities/Post.js";
 import { User } from "../../entities/User.js";
 import { Vote } from "../../entities/Vote.js";
@@ -15,21 +17,21 @@ async function getPostCounts(
   const [commentCounts, likeCounts, dislikeCounts] = await Promise.all([
     em
       .createQueryBuilder(Comment, "c")
-      .select(["c.post_id as postId", raw("COUNT(c.id) as count")])
+      .select(["c.post_id as postId", expr("COUNT(c.id) as count")])
       .where({ post: { id: { $in: postIds } } })
       .groupBy("c.post_id")
       .execute() as Promise<{ postId: number; count: string }[]>,
 
     em
       .createQueryBuilder(Vote, "v")
-      .select(["v.post_id as postId", raw("COUNT(v.id) as count")])
+      .select(["v.post_id as postId", expr("COUNT(v.id) as count")])
       .where({ value: 1, post: { id: { $in: postIds } } })
       .groupBy("v.post_id")
       .execute() as Promise<{ postId: number; count: string }[]>,
 
     em
       .createQueryBuilder(Vote, "v")
-      .select(["v.post_id as postId", raw("COUNT(v.id) as count")])
+      .select(["v.post_id as postId", expr("COUNT(v.id) as count")])
       .where({ value: -1, post: { id: { $in: postIds } } })
       .groupBy("v.post_id")
       .execute() as Promise<{ postId: number; count: string }[]>,
@@ -251,14 +253,18 @@ export const postResolvers = {
       if (existingPostCount > 0) {
         slug = `${slug}-${existingPostCount + 1}`;
       }
-      const post = em.create(Post, { title, text, user, slug });
+      const post = em.create(Post, {
+        title, text, user, slug,
+        createdAt: "",
+        updatedAt: ""
+      });
       await em.persistAndFlush(post);
       return post;
     },
     updatePost: async (
       _: any,
       { id, title, text }: any,
-      { em }
+      { em } : MikroORM
     ): Promise<Post> => {
       const post = await em.findOne(Post, id, { populate: ["user"] });
       if (!post) {

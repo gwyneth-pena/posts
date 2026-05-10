@@ -1,4 +1,5 @@
-import { EntityManager, MikroORM } from "@mikro-orm/core";
+import { MikroORM } from "@mikro-orm/core";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { Comment } from "../../entities/Comment.js";
 import { Post } from "../../entities/Post.js";
 
@@ -51,6 +52,8 @@ export const commentResolvers = {
         post,
         user: req.session.userId,
         parent: parentId ? parentId : null,
+        createdAt: "",
+        updatedAt: ""
       });
       await em.persistAndFlush(comment);
       return em.findOneOrFail(Comment, comment.id, { populate: ["user"] });

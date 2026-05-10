@@ -28,7 +28,7 @@ export class Comment {
   })
   children = new Collection<Comment>(this);
 
-  @Property({ columnType: "longtext" })
+  @Property({ columnType: "text" })
   text!: string;
 
   @Property()

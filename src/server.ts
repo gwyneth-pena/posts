@@ -8,7 +8,6 @@ import session from "express-session";
 import cors from "cors";
 import { envConfig } from "./config.env.js";
 import { getRedisStore, getRedisClient } from "./redis.js";
-import cookie from "cookie";
 
 export async function createServer() {
   await connectToMongo();
@@ -72,7 +71,6 @@ export async function createServer() {
   });
   await server.start();
 
-  server.applyMiddleware({ app, path: "/graphql", cors: false });
-
+  server.applyMiddleware({ app: app as any, path: "/graphql", cors: false });
   return app;
 }
